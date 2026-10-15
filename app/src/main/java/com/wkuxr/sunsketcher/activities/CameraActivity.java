@@ -44,6 +44,7 @@ import androidx.core.content.ContextCompat;
 import com.wkuxr.sunsketcher.R;
 import com.wkuxr.sunsketcher.database.Metadata;
 import com.wkuxr.sunsketcher.database.MetadataDB;
+import com.wkuxr.sunsketcher.database.MetadataExporter;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -486,6 +487,8 @@ public class CameraActivity extends AppCompatActivity {
 
             //temporary replacement code
             Log.d("ACTIVITYSWITCH", "To FinishedInfoActivity");
+            // Export metadata.json + metadata.csv to Documents/SunSketcher (matches the iOS app)
+            MetadataExporter.INSTANCE.exportAll(singleton);
             Intent intent = new Intent(singleton, FinishedInfoActivity.class);
             singleton.closeCamera();
             singleton.startActivity(intent);

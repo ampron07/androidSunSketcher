@@ -1,5 +1,5 @@
 package com.wkuxr.sunsketcher.activities
-
+import java.util.Calendar
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -107,7 +107,15 @@ class CountdownActivity : AppCompatActivity() {
                     //lon = -86.443602
 
                     //get contact times using obtained location TODO: use for actual app releases
-                    val contactTimes = LocToTime.calculatefor(lat, lon, alt)
+                    //val contactTimes = LocToTime.calculatefor(lat, lon, alt)
+
+                    //TODO: TEST ONLY - fake Bowling Green location, totality at 11:00 PM. Remove before release.
+                    lat = 36.9685
+                    lon = -86.4808
+                    val start = java.time.ZonedDateTime.now(java.time.ZoneId.of("America/Chicago"))
+                        .with(java.time.LocalTime.of(23, 0))
+                        .toInstant().toEpochMilli()
+                    val contactTimes = longArrayOf(start, start + 160_000L)
 
                     //make sure the user is actually in eclipse path before trying to do any scheduling stuff
                     if (contactTimes[0] != Long.MAX_VALUE) {
