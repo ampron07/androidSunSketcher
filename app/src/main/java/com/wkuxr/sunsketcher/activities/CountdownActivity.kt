@@ -40,7 +40,8 @@ class CountdownActivity : AppCompatActivity() {
                 Intent(this, SendConfirmationActivity::class.java)
             } else { //cropped is false if not all images have been cropped (this is also the default if cropped is not found)
                 //Intent(this, ImageCroppingActivity::class.java)
-                Intent(this, SendConfirmationActivity::class.java)
+                //Intent(this, SendConfirmationActivity::class.java)
+                Intent(this, ImageCroppingActivity::class.java)
             }
 
             0 -> intent = Intent(this, FinishedInfoDenyActivity::class.java) //0 means upload was denied
@@ -108,7 +109,10 @@ class CountdownActivity : AppCompatActivity() {
 
                     //get contact times using obtained location TODO: use for actual app releases
                     //val contactTimes = LocToTime.calculatefor(lat, lon, alt)
+         enable-image-cropping
 
+
+          main
                     //TODO: TEST ONLY - fake Bowling Green location, totality at 11:00 PM. Remove before release.
                     lat = 36.9685
                     lon = -86.4808

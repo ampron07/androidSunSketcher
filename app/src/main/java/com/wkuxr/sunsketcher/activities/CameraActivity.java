@@ -325,6 +325,8 @@ public class CameraActivity extends AppCompatActivity {
                 } else {
                     // Temporarily disabled (OpenCV not in use)
                     // intent = new Intent(this, ImageCroppingActivity.class);
+                    // Re-enabled now that OpenCV cropping is back in use
+                    intent = new Intent(this, ImageCroppingActivity.class);
                 }
                 break;
             case 0: //denied upload after taking images
@@ -439,7 +441,7 @@ public class CameraActivity extends AppCompatActivity {
         @Override
         public void run() {
             startStillCaptureRequest();
-            sequenceHandler.postDelayed(this, 500);
+            sequenceHandler.postDelayed(this, 100);
         }
     };
 
@@ -485,11 +487,21 @@ public class CameraActivity extends AppCompatActivity {
             // Log.d("ACTIVITYSWITCH", "To " + ImageCroppingActivity.class.getName());
             // Intent intent = new Intent(singleton, ImageCroppingActivity.class);
 
+      enable-image-cropping
+            // Re-enabled: go to the image cropping screen after the eclipse sequence
+            Log.d("ACTIVITYSWITCH", "To " + ImageCroppingActivity.class.getName());
+            Intent intent = new Intent(singleton, ImageCroppingActivity.class);
+
+            //temporary replacement code (disabled now that cropping is back)
+            //Log.d("ACTIVITYSWITCH", "To FinishedInfoActivity");
+            //Intent intent = new Intent(singleton, FinishedInfoActivity.class);
+
             //temporary replacement code
             Log.d("ACTIVITYSWITCH", "To FinishedInfoActivity");
             // Export metadata.json + metadata.csv to Documents/SunSketcher (matches the iOS app)
             MetadataExporter.INSTANCE.exportAll(singleton);
             Intent intent = new Intent(singleton, FinishedInfoActivity.class);
+        main
             singleton.closeCamera();
             singleton.startActivity(intent);
             singleton.finish(); //makes this screen automatically close if someone tries to navigate back to it using the back button, if the code in the onCreate function that switches the activity context fails
@@ -615,7 +627,12 @@ public class CameraActivity extends AppCompatActivity {
             }
             mPreviewSize = chooseOptimalSize(map.getOutputSizes(SurfaceTexture.class), rotatedWidth, rotatedHeight);
             Size mImageSize = chooseOptimalSize(map.getOutputSizes(imageFormat), rotatedWidth, rotatedHeight);
-            mImageReader = ImageReader.newInstance(mImageSize.getWidth(), mImageSize.getHeight(), imageFormat, 1);
+            mImageReader = ImageReader.newInstance(
+                    mImageSize.getWidth(),
+                    mImageSize.getHeight(),
+                    imageFormat,
+                    10
+            );
             mImageReader.setOnImageAvailableListener(mOnImageAvailableListener, mBackgroundHandler);
             mCameraId = currentLarge;
             CameraCharacteristics characteristics = cameraManager.getCameraCharacteristics(mCameraId);

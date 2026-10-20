@@ -12,7 +12,7 @@ android {
 
     defaultConfig {
         applicationId "com.wkuxr.eclipsetotality"
-        minSdk 31
+        minSdk 28
         targetSdk 33
         versionCode 29
         versionName "1.0.7"
@@ -41,14 +41,16 @@ android {
     namespace 'com.wkuxr.sunsketcher'
 
     // Only include the CMake build if OpenCV is enabled
-     if (useOpenCV) {
-        externalNativeBuild {
-            cmake {
-                path "src/main/cpp/CMakeLists.txt"
-                arguments "-DUSE_OPENCV=${useOpenCV}"
-           }
-        }
-    }
+    // DISABLED: there is no src/main/cpp/CMakeLists.txt, and the app only uses OpenCV's Java API
+    // (the :opencv module below supplies the native opencv_java4 library), so no CMake build is needed.
+    // if (useOpenCV) {
+    //    externalNativeBuild {
+    //        cmake {
+    //            path "src/main/cpp/CMakeLists.txt"
+    //            arguments "-DUSE_OPENCV=${useOpenCV}"
+    //       }
+    //    }
+    // }
 }
 
 dependencies {
