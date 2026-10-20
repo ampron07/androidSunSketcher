@@ -44,6 +44,7 @@ import androidx.core.content.ContextCompat;
 import com.wkuxr.sunsketcher.R;
 import com.wkuxr.sunsketcher.database.Metadata;
 import com.wkuxr.sunsketcher.database.MetadataDB;
+import com.wkuxr.sunsketcher.database.MetadataExporter;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -486,6 +487,7 @@ public class CameraActivity extends AppCompatActivity {
             // Log.d("ACTIVITYSWITCH", "To " + ImageCroppingActivity.class.getName());
             // Intent intent = new Intent(singleton, ImageCroppingActivity.class);
 
+      enable-image-cropping
             // Re-enabled: go to the image cropping screen after the eclipse sequence
             Log.d("ACTIVITYSWITCH", "To " + ImageCroppingActivity.class.getName());
             Intent intent = new Intent(singleton, ImageCroppingActivity.class);
@@ -493,6 +495,13 @@ public class CameraActivity extends AppCompatActivity {
             //temporary replacement code (disabled now that cropping is back)
             //Log.d("ACTIVITYSWITCH", "To FinishedInfoActivity");
             //Intent intent = new Intent(singleton, FinishedInfoActivity.class);
+
+            //temporary replacement code
+            Log.d("ACTIVITYSWITCH", "To FinishedInfoActivity");
+            // Export metadata.json + metadata.csv to Documents/SunSketcher (matches the iOS app)
+            MetadataExporter.INSTANCE.exportAll(singleton);
+            Intent intent = new Intent(singleton, FinishedInfoActivity.class);
+        main
             singleton.closeCamera();
             singleton.startActivity(intent);
             singleton.finish(); //makes this screen automatically close if someone tries to navigate back to it using the back button, if the code in the onCreate function that switches the activity context fails

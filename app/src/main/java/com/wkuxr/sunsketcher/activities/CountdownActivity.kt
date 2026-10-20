@@ -1,5 +1,5 @@
 package com.wkuxr.sunsketcher.activities
-
+import java.util.Calendar
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -109,6 +109,10 @@ class CountdownActivity : AppCompatActivity() {
 
                     //get contact times using obtained location TODO: use for actual app releases
                     //val contactTimes = LocToTime.calculatefor(lat, lon, alt)
+         enable-image-cropping
+
+
+          main
                     //TODO: TEST ONLY - fake Bowling Green location, totality at 11:00 PM. Remove before release.
                     lat = 36.9685
                     lon = -86.4808
