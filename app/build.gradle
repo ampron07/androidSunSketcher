@@ -41,14 +41,16 @@ android {
     namespace 'com.wkuxr.sunsketcher'
 
     // Only include the CMake build if OpenCV is enabled
-     if (useOpenCV) {
-        externalNativeBuild {
-            cmake {
-                path "src/main/cpp/CMakeLists.txt"
-                arguments "-DUSE_OPENCV=${useOpenCV}"
-           }
-        }
-    }
+    // DISABLED: there is no src/main/cpp/CMakeLists.txt, and the app only uses OpenCV's Java API
+    // (the :opencv module below supplies the native opencv_java4 library), so no CMake build is needed.
+    // if (useOpenCV) {
+    //    externalNativeBuild {
+    //        cmake {
+    //            path "src/main/cpp/CMakeLists.txt"
+    //            arguments "-DUSE_OPENCV=${useOpenCV}"
+    //       }
+    //    }
+    // }
 }
 
 dependencies {

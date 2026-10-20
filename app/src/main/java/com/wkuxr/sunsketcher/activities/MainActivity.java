@@ -115,7 +115,8 @@ public class MainActivity extends AppCompatActivity {
                 } else { //cropped is false if not all images have been cropped (this is also the default if cropped is not found)
                     // intent = new Intent(this, ImageCroppingActivity.class);
                     // ^^ Comment out the image cropping reference
-                    intent = new Intent(this, SendConfirmationActivity.class);
+                    // intent = new Intent(this, SendConfirmationActivity.class);
+                    intent = new Intent(this, ImageCroppingActivity.class);
                 }
                 break;
             case 0: //denied upload

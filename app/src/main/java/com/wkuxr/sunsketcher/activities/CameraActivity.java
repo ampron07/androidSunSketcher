@@ -324,6 +324,8 @@ public class CameraActivity extends AppCompatActivity {
                 } else {
                     // Temporarily disabled (OpenCV not in use)
                     // intent = new Intent(this, ImageCroppingActivity.class);
+                    // Re-enabled now that OpenCV cropping is back in use
+                    intent = new Intent(this, ImageCroppingActivity.class);
                 }
                 break;
             case 0: //denied upload after taking images
@@ -484,9 +486,13 @@ public class CameraActivity extends AppCompatActivity {
             // Log.d("ACTIVITYSWITCH", "To " + ImageCroppingActivity.class.getName());
             // Intent intent = new Intent(singleton, ImageCroppingActivity.class);
 
-            //temporary replacement code
-            Log.d("ACTIVITYSWITCH", "To FinishedInfoActivity");
-            Intent intent = new Intent(singleton, FinishedInfoActivity.class);
+            // Re-enabled: go to the image cropping screen after the eclipse sequence
+            Log.d("ACTIVITYSWITCH", "To " + ImageCroppingActivity.class.getName());
+            Intent intent = new Intent(singleton, ImageCroppingActivity.class);
+
+            //temporary replacement code (disabled now that cropping is back)
+            //Log.d("ACTIVITYSWITCH", "To FinishedInfoActivity");
+            //Intent intent = new Intent(singleton, FinishedInfoActivity.class);
             singleton.closeCamera();
             singleton.startActivity(intent);
             singleton.finish(); //makes this screen automatically close if someone tries to navigate back to it using the back button, if the code in the onCreate function that switches the activity context fails

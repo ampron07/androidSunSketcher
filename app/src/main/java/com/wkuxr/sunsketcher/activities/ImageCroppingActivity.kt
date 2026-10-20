@@ -1,6 +1,6 @@
 package com.wkuxr.sunsketcher.activities
-// Commenting out the whole file temporarily; no OpenCV/image processing needed
-/*
+// (File was previously commented out entirely; re-enabled now that OpenCV cropping is back in use)
+// /*
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
@@ -109,6 +109,7 @@ class ImageCroppingActivity : AppCompatActivity() {
                 // then save the cropped image to the cropped image folder and replace db filepath
                 var numCropped = 0
                 val numToCrop = 20
+                var hitLimit = false //true if we stopped early because the batch limit was reached
                 for (metadataRow in metadataList) {
                     if (metadataRow.isCropped) {
                         //don't crop images that have already been cropped
@@ -117,12 +118,19 @@ class ImageCroppingActivity : AppCompatActivity() {
                     if (numCropped >= numToCrop) {
                         //will only be true if we aren't on the final round of images to crop, so we say that not all of the images have been cropped (because we assume at the end of the for loop that this is the final round, and we need the app to know that it isn't)
                         prefs.edit().putBoolean("cropped", false).commit() //synchronously update the shared preferences
+                        hitLimit = true
                         break
                     }
 
                     // create bitmap from current image
                     val imgOriginal = File(metadataRow.filepath)
                     val newImgBitmap = BitmapFactory.decodeFile(metadataRow.filepath)
+
+                    // FIX: decodeFile returns null if the file is missing/unreadable; skip it instead of crashing
+                    if (newImgBitmap == null) {
+                        Log.e("ImageCropping", "Could not decode image ${metadataRow.id}: ${metadataRow.filepath}")
+                        continue
+                    }
 
                     var imgMatCropped = Mat()
                     Utils.bitmapToMat(newImgBitmap, imgMatCropped)
@@ -141,12 +149,15 @@ class ImageCroppingActivity : AppCompatActivity() {
 
                     //get the relevant exif data for the image
                     val exif = ExifInterface(imgOriginal.absolutePath)
-                    var fstop = exif.getAttribute(ExifInterface.TAG_F_NUMBER)?.toDouble()
-                    val iso =
-                        Integer.parseInt(exif.getAttribute(ExifInterface.TAG_PHOTOGRAPHIC_SENSITIVITY))
-                    val whiteBalance =
-                        Integer.parseInt(exif.getAttribute(ExifInterface.TAG_WHITE_BALANCE))
-                    var exposure = exif.getAttribute(ExifInterface.TAG_EXPOSURE_TIME)?.toDouble()
+                    var fstop = exif.getAttribute(ExifInterface.TAG_F_NUMBER)?.toDoubleOrNull() // FIX: was toDouble()
+                    //val iso =
+                    //    Integer.parseInt(exif.getAttribute(ExifInterface.TAG_PHOTOGRAPHIC_SENSITIVITY))
+                    //val whiteBalance =
+                    //    Integer.parseInt(exif.getAttribute(ExifInterface.TAG_WHITE_BALANCE))
+                    // FIX: parseInt crashes if the EXIF tag is missing; fall back to 0
+                    val iso = exif.getAttribute(ExifInterface.TAG_PHOTOGRAPHIC_SENSITIVITY)?.toIntOrNull() ?: 0
+                    val whiteBalance = exif.getAttribute(ExifInterface.TAG_WHITE_BALANCE)?.toIntOrNull() ?: 0
+                    var exposure = exif.getAttribute(ExifInterface.TAG_EXPOSURE_TIME)?.toDoubleOrNull() // FIX: was toDouble()
                     var focalDistance = exif.getAttribute(ExifInterface.TAG_FOCAL_LENGTH);
 
                     if (fstop == null) {
@@ -177,6 +188,12 @@ class ImageCroppingActivity : AppCompatActivity() {
                     )
 
                     //assume this call of the cropImages function is the final call to it
+                    prefs.edit().putBoolean("cropped", true).commit()
+                }
+
+                // FIX: if we didn't stop because of the batch limit, everything that can be cropped is done.
+                // Without this, skipped/already-cropped rows could leave "cropped" false and loop forever.
+                if (!hitLimit) {
                     prefs.edit().putBoolean("cropped", true).commit()
                 }
 
@@ -230,8 +247,11 @@ class ImageCroppingActivity : AppCompatActivity() {
         println("Max Location- X: $maxLocX Y: $maxLocY")
 
         // get the image's dimensions based off mat rows and columns
-        val imgMaxX: Int = img.rows()
-        val imgMaxY: Int = img.cols()
+        // FIX: x is the column (width) axis and y is the row (height) axis; these were swapped
+        //val imgMaxX: Int = img.rows()
+        //val imgMaxY: Int = img.cols()
+        val imgMaxX: Int = img.cols()
+        val imgMaxY: Int = img.rows()
 
         // side length of box relative to image size, ~2% of original image size
         val side = (Math.sqrt((imgMaxX * imgMaxY).toDouble()) * 0.02)
@@ -278,4 +298,4 @@ class ImageCroppingActivity : AppCompatActivity() {
         return pt
     }
 }
- */
+// */
