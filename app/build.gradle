@@ -12,7 +12,7 @@ android {
 
     defaultConfig {
         applicationId "com.wkuxr.eclipsetotality"
-        minSdk 28
+        minSdk 31
         targetSdk 33
         versionCode 29
         versionName "1.0.7"

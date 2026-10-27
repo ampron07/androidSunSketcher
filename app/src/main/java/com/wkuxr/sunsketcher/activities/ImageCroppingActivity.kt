@@ -218,10 +218,14 @@ class ImageCroppingActivity : AppCompatActivity() {
 
     }
 
-    // creates folder in SunSketchers directory for cropped images. Returns created folder
+    // creates a "Cropped" folder next to the original photos (Pictures/SunSketcher/Cropped) so they show up in the Photos app
     private fun createCroppedImageFolder(): File {
-        //return the root directory of the app's internal files
-        return filesDir
+        val pictures = android.os.Environment.getExternalStoragePublicDirectory(android.os.Environment.DIRECTORY_PICTURES)
+        val folder = File(pictures, "SunSketcher/Cropped")
+        if (!folder.exists()) {
+            folder.mkdirs()
+        }
+        return folder
     }
 
     //convert the image material to greyscale

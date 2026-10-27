@@ -121,11 +121,20 @@ public class CameraActivity extends AppCompatActivity {
     private ImageReader mImageReader;
 
     //callback from images being captured
+    //callback from images being captured
     private final ImageReader.OnImageAvailableListener mOnImageAvailableListener = new
             ImageReader.OnImageAvailableListener() {
                 @Override
                 public void onImageAvailable(ImageReader reader) {
-                    mBackgroundHandler.post(new ImageSaver(reader.acquireLatestImage()));
+                    //take the next photo in line (not just the newest), so none get thrown away
+                    Image image = reader.acquireNextImage();
+                    if (image != null) {
+                        //we're already on the background thread, so save it right away
+                        new ImageSaver(image).run();
+                        Log.d("CameraDebug", "Saved image: " + mImageFileName);
+                    } else {
+                        Log.d("CameraDebug", "No image available, skipped.");
+                    }
                 }
             };
 
@@ -423,7 +432,7 @@ public class CameraActivity extends AppCompatActivity {
         @Override
         public void run(){
             startStillCaptureRequest();
-            sequenceHandler.postDelayed(this, 2000);
+            sequenceHandler.postDelayed(this, 1000);
         }
     };
 
@@ -441,7 +450,7 @@ public class CameraActivity extends AppCompatActivity {
         @Override
         public void run() {
             startStillCaptureRequest();
-            sequenceHandler.postDelayed(this, 100);
+            sequenceHandler.postDelayed(this, 250);
         }
     };
 
@@ -481,27 +490,16 @@ public class CameraActivity extends AppCompatActivity {
     }
 
     //scheduled task that closes the camera and switches context activities
+
     static class SwitchActivityTask extends TimerTask {
         public void run(){
-            // Below disabled temporarily, no image processing
-            // Log.d("ACTIVITYSWITCH", "To " + ImageCroppingActivity.class.getName());
-            // Intent intent = new Intent(singleton, ImageCroppingActivity.class);
+            // Export metadata.json + metadata.csv to Documents/SunSketcher (matches the iOS app)
+            MetadataExporter.INSTANCE.exportAll(singleton);
 
-      enable-image-cropping
             // Re-enabled: go to the image cropping screen after the eclipse sequence
             Log.d("ACTIVITYSWITCH", "To " + ImageCroppingActivity.class.getName());
             Intent intent = new Intent(singleton, ImageCroppingActivity.class);
 
-            //temporary replacement code (disabled now that cropping is back)
-            //Log.d("ACTIVITYSWITCH", "To FinishedInfoActivity");
-            //Intent intent = new Intent(singleton, FinishedInfoActivity.class);
-
-            //temporary replacement code
-            Log.d("ACTIVITYSWITCH", "To FinishedInfoActivity");
-            // Export metadata.json + metadata.csv to Documents/SunSketcher (matches the iOS app)
-            MetadataExporter.INSTANCE.exportAll(singleton);
-            Intent intent = new Intent(singleton, FinishedInfoActivity.class);
-        main
             singleton.closeCamera();
             singleton.startActivity(intent);
             singleton.finish(); //makes this screen automatically close if someone tries to navigate back to it using the back button, if the code in the onCreate function that switches the activity context fails
