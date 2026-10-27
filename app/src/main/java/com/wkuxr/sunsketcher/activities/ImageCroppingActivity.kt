@@ -13,6 +13,7 @@ import androidx.exifinterface.media.ExifInterface
 import com.wkuxr.sunsketcher.R
 import com.wkuxr.sunsketcher.database.Metadata
 import com.wkuxr.sunsketcher.database.MetadataDB
+import com.wkuxr.sunsketcher.database.MetadataExporter
 import org.opencv.android.Utils
 import org.opencv.core.Core
 import org.opencv.core.Mat
@@ -45,16 +46,37 @@ class ImageCroppingActivity : AppCompatActivity() {
         prefs = getSharedPreferences("eclipseDetails", Context.MODE_PRIVATE)
 
         //crop images on a background thread
-        Executors.newSingleThreadExecutor().execute{
+        Executors.newSingleThreadExecutor().execute {
+
+            Log.d(
+                "ImageCropping",
+                "Cropping preference: ${prefs.getBoolean("cropped", false)}"
+            )
+
             while (!prefs.getBoolean("cropped", false)) {
+                Log.d("ImageCropping", "Starting image cropping")
                 cropImages()
             }
 
-            //once cropping has finished, update the cropped variable in shared preferences and move to the SendConfirmationActivity
-            prefs.edit().putBoolean("cropped", true).apply()
-            val intent = Intent(this, SendConfirmationActivity::class.java)
-            startActivity(intent)
+            // Keep your existing metadata export and navigation code here
         }
+
+            //once cropping has finished, update the cropped variable in shared preferences and move to the SendConfirmationActivity
+            // Cropping process has finished
+            prefs.edit().putBoolean("cropped", true).apply()
+
+// Export updated metadata to CSV and JSON
+            MetadataExporter.exportAll(this@ImageCroppingActivity)
+
+// Move to the confirmation screen
+            runOnUiThread {
+                val intent = Intent(
+                    this@ImageCroppingActivity,
+                    SendConfirmationActivity::class.java
+                )
+                startActivity(intent)
+                finish()
+            }
     }
 
     override fun onResume() {
