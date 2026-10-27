@@ -437,12 +437,15 @@ public class CameraActivity extends AppCompatActivity {
     }
 
     //thread runnable that takes a photo and then waits for 0.5 seconds
-    Runnable fastSequenceRunnable = new Runnable(){
+    Runnable fastSequenceRunnable = new Runnable() {
         @Override
         public void run() {
             startStillCaptureRequest();
-            sequenceHandler.postDelayed(this, 100);
+
+            // Capture one picture every 500 milliseconds
+            sequenceHandler.postDelayed(this, 500);
         }
+    };
     };
 
     //scheduled task that removes all slow capture task callbacks and starts the 2-per-second image captures
@@ -482,29 +485,18 @@ public class CameraActivity extends AppCompatActivity {
 
     //scheduled task that closes the camera and switches context activities
     static class SwitchActivityTask extends TimerTask {
-        public void run(){
-            // Below disabled temporarily, no image processing
-            // Log.d("ACTIVITYSWITCH", "To " + ImageCroppingActivity.class.getName());
-            // Intent intent = new Intent(singleton, ImageCroppingActivity.class);
+        @Override
+        public void run() {
+            Log.d("ACTIVITYSWITCH", "Starting image cropping");
 
-      enable-image-cropping
-            // Re-enabled: go to the image cropping screen after the eclipse sequence
-            Log.d("ACTIVITYSWITCH", "To " + ImageCroppingActivity.class.getName());
-            Intent intent = new Intent(singleton, ImageCroppingActivity.class);
+            Intent intent = new Intent(
+                    singleton,
+                    ImageCroppingActivity.class
+            );
 
-            //temporary replacement code (disabled now that cropping is back)
-            //Log.d("ACTIVITYSWITCH", "To FinishedInfoActivity");
-            //Intent intent = new Intent(singleton, FinishedInfoActivity.class);
-
-            //temporary replacement code
-            Log.d("ACTIVITYSWITCH", "To FinishedInfoActivity");
-            // Export metadata.json + metadata.csv to Documents/SunSketcher (matches the iOS app)
-            MetadataExporter.INSTANCE.exportAll(singleton);
-            Intent intent = new Intent(singleton, FinishedInfoActivity.class);
-        main
             singleton.closeCamera();
             singleton.startActivity(intent);
-            singleton.finish(); //makes this screen automatically close if someone tries to navigate back to it using the back button, if the code in the onCreate function that switches the activity context fails
+            singleton.finish();
         }
     }
 
