@@ -47,36 +47,28 @@ class ImageCroppingActivity : AppCompatActivity() {
 
         //crop images on a background thread
         Executors.newSingleThreadExecutor().execute {
-
-            Log.d(
-                "ImageCropping",
-                "Cropping preference: ${prefs.getBoolean("cropped", false)}"
-            )
+            Log.d("ImageCropping", "Cropping preference: ${prefs.getBoolean("cropped", false)}")
 
             while (!prefs.getBoolean("cropped", false)) {
                 Log.d("ImageCropping", "Starting image cropping")
-                cropImages()
+                try {
+                    cropImages()
+                } catch (t: Throwable) {
+                    Log.e("ImageCropping", "Cropping failed", t)
+                    break
+                }
             }
 
-            // Keep your existing metadata export and navigation code here
-        }
-
-            //once cropping has finished, update the cropped variable in shared preferences and move to the SendConfirmationActivity
-            // Cropping process has finished
-            prefs.edit().putBoolean("cropped", true).apply()
-
-// Export updated metadata to CSV and JSON
+            // cropping is done, so save that and export the updated metadata
+            prefs.edit().putBoolean("cropped", true).commit()
             MetadataExporter.exportAll(this@ImageCroppingActivity)
 
-// Move to the confirmation screen
+            // move to the confirmation screen
             runOnUiThread {
-                val intent = Intent(
-                    this@ImageCroppingActivity,
-                    SendConfirmationActivity::class.java
-                )
-                startActivity(intent)
+                startActivity(Intent(this@ImageCroppingActivity, SendConfirmationActivity::class.java))
                 finish()
             }
+        }
     }
 
     override fun onResume() {
@@ -100,20 +92,26 @@ class ImageCroppingActivity : AppCompatActivity() {
         // get list of all rows (user's images) in metadata
         val metadataList: List<Metadata> = db.getMetadata()
 
-        // get crop box from the center image
-        val centerMetadata = metadataList[metadataList.size / 2]
+        // find the crop box only once, using a readable photo closest to the middle
+        if (cropBox == null) {
+            val middle = metadataList.size / 2
+            val centerBitmap = metadataList.indices
+                .sortedBy { Math.abs(it - middle) }
+                .asSequence()
+                .mapNotNull { BitmapFactory.decodeFile(metadataList[it].filepath) }
+                .firstOrNull()
 
-        // create bitmap from image
-        val imgBitmap = BitmapFactory.decodeFile(centerMetadata.filepath)
+            if (centerBitmap == null) {
+                Log.e("ImageCropping", "No readable images found; skipping cropping.")
+                prefs.edit().putBoolean("cropped", true).commit()
+                return
+            }
 
-        // convert bitmap to mat
-        val imgMat = Mat()
-        Utils.bitmapToMat(imgBitmap, imgMat)
-
-        // find the correct crop box using the center image
-
-        if(cropBox == null) {
-            cropBox = getEclipseBox(imgMat)
+            val centerMat = Mat()
+            Utils.bitmapToMat(centerBitmap, centerMat)
+            centerBitmap.recycle()
+            cropBox = getEclipseBox(centerMat)
+            centerMat.release()
         }
 
         // create folder for cropped images to be stored on the phone
@@ -154,20 +152,23 @@ class ImageCroppingActivity : AppCompatActivity() {
                         continue
                     }
 
-                    var imgMatCropped = Mat()
-                    Utils.bitmapToMat(newImgBitmap, imgMatCropped)
+                    val fullMat = Mat()
+                    Utils.bitmapToMat(newImgBitmap, fullMat)
+                    newImgBitmap.recycle()                         // free the Java copy right away
 
-                    Imgproc.cvtColor(imgMatCropped, imgMatCropped, Imgproc.COLOR_BGR2RGB)
-
+                    Imgproc.cvtColor(fullMat, fullMat, Imgproc.COLOR_BGR2RGB)
 
                     // crop the image using crop box
-                    imgMatCropped = Mat(imgMatCropped, cropBox)
+                    val imgMatCropped = Mat(fullMat, cropBox)
 
                     // create image file in the crop image folder with original image's name
                     val imgCroppedFile = File(mCropImageFolder, imgOriginal.name)
 
                     // write the cropped image to the cropped image file
                     Imgcodecs.imwrite(imgCroppedFile.absolutePath, imgMatCropped)
+
+                    imgMatCropped.release()                        // free the OpenCV memory
+                    fullMat.release()
 
                     //get the relevant exif data for the image
                     val exif = ExifInterface(imgOriginal.absolutePath)
