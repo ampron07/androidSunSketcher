@@ -496,8 +496,9 @@ public class CameraActivity extends AppCompatActivity {
             // Export metadata.json + metadata.csv to Documents/SunSketcher (matches the iOS app)
             MetadataExporter.INSTANCE.exportAll(singleton);
 
-            // Re-enabled: go to the image cropping screen after the eclipse sequence
             Log.d("ACTIVITYSWITCH", "To " + ImageCroppingActivity.class.getName());
+            // new photos were just taken, so mark them as not cropped yet
+            singleton.getSharedPreferences("eclipseDetails", MODE_PRIVATE).edit().putBoolean("cropped", false).commit();
             Intent intent = new Intent(singleton, ImageCroppingActivity.class);
 
             singleton.closeCamera();
