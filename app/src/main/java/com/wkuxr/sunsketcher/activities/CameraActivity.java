@@ -737,7 +737,7 @@ public class CameraActivity extends AppCompatActivity {
     }
 
     private void startStillCaptureRequest(){
-        startStillCaptureRequest(125000L); //default exposure time of 1/8000s, 10000000 is 1/100s
+        startStillCaptureRequest(10000000L); //default exposure time of 1/8000s, 10000000 is 1/100s
     }
 
     //this rggb converter snippet was written by Francisco Durdin Garcia on stackoverflow

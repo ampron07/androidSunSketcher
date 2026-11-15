@@ -71,15 +71,6 @@ class ImageCroppingActivity : AppCompatActivity() {
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-
-        //don't want things to be unrecoverably messed up, so move to the SendConfirmationActivity if the app is resumed
-        if (!prefs.getBoolean("cropped", true)) {
-            val intent = Intent(this, SendConfirmationActivity::class.java)
-            startActivity(intent)
-        }
-    }
 
     var cropBox: Rect? = null
 
