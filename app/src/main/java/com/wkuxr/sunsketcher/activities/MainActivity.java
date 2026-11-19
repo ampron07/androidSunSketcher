@@ -43,6 +43,24 @@ public class MainActivity extends AppCompatActivity {
         singleton = this;
         App.setContext(this);
 
+        // FR1: on app start, get a client ID from the server (only if we don't have one yet)
+        SharedPreferences idPrefs = getSharedPreferences("eclipseDetails", Context.MODE_PRIVATE);
+        long clientID = idPrefs.getLong("clientID", -1);
+        if (clientID == -1) {
+            Thread idThread = new Thread(() -> {
+                try {
+                    IDRequest.clientTransferSequence();
+                    Log.d("ClientID", "ClientID: " + idPrefs.getLong("clientID", -1));
+                } catch (Exception e) {
+                    Log.e("ClientID", "Could not connect to server to obtain client ID.");
+                    e.printStackTrace();
+                }
+            });
+            idThread.start();
+        } else {
+            Log.d("ClientID", "Already have ClientID: " + clientID);
+        }
+
         if (!reqPerm(perms)) {
             return;
         }

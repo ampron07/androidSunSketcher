@@ -70,13 +70,25 @@ class CountdownActivity : AppCompatActivity() {
 
     }
 
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == 1) {
+            if (grantResults.isNotEmpty() && grantResults.all { it == PackageManager.PERMISSION_GRANTED }) {
+                getLocation()
+            } else {
+                binding.countdownLocationDetailsText.text = ""
+                binding.countdownTimeText.text = "Location permission denied. Please grant location permissions in Settings."
+            }
+        }
+    }
+
     var timerSet = false
 
     //this function accesses the GPS location, calculates the time of totality (if the user is not in the path of totality, it says so in the UI and does not do anything), and uses it to schedule when to switch to the camera activity
     private fun getLocation() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             //request permission again if it wasn't given
-            requestPermissions(arrayOf("android.permission.ACCESS_FINE_LOCATION"), 1)
+            requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION), 1)
         } else {
             binding.countdownLocationDetailsText.text = "Getting GPS Location"
 
